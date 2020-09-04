@@ -1,0 +1,33 @@
+% Ex1 : interpolation liénaire. La fonction interp_lin permettant de faire
+% l'interpolation liénaire entre 2 points est à la fin du fichier.
+clf
+
+x = 0:0.1:5;
+y = x.*sin(x);
+
+% Représentation de la fonctions
+% hold on car sinon les courbes sont effacées à chaque appel de plot
+plot(x,y,'r-'), hold on
+
+% Calcul des points entre lesquels se font les interpolation (xi,yi) et représentation
+xi = 0:5;
+yi = xi.*sin(xi);
+plot(xi,yi,'ro')
+
+% Interpolation sur 5 éléments et représentation
+for i = 1:5 % les indices commencent à 1 en matlab
+    % points de calculs sur chaque segment 
+    x = xi(i):0.1:xi(i+1); 
+    % interpolation liénaire sur chaque segment
+    y = lin_interp(xi(i),xi(i+1),yi(i),yi(i+1),x);
+    plot(x,y,'b--')
+end
+
+%% Fonctions
+function y = lin_interp(x0,x1,y0,y1,x)
+
+phi_0 = (x1-x)/(x1-x0);
+phi_1 = (x-x0)/(x1-x0);
+y = y0*phi_0 + y1*phi_1;
+
+    

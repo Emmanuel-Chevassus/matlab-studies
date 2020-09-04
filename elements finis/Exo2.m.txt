@@ -1,0 +1,94 @@
+%% Exercice sur la comparaison solution analytique - solution
+% élément finis dans le cas d'une poutre élastique soumise à 
+% son propre poids ou à une force
+% Ici la fonction assemble loc, fait partie du script
+
+%% propriétés de la barre
+L = 5; % Longueur en m
+Nel = 3; % Nombre éléments : Nel = 3 ou 10
+l = L/Nel; % longueur d'un élément
+rho = 1000; % densité en kg/m3
+g = 9.8; % accelération de la pesanteur
+E = 10e6; % Module d'Young en Pa
+S = 0.3; % section en m²
+b = 15000; % force appliquée égale à 0 ou 15000
+u1 = 0; % déplacement au point d'attache
+
+%% solutions Analytique
+% solution analytique tous les 0.1 m sans force appliquée
+x_fin = 0:0.1:L;
+u_fin = (-0.5*x_fin.^2+L*x_fin)*rho*g/E;
+% solution analytique avec force appliquée
+u_fin_f = (-0.5*rho*g*x_fin.^2 + (b/S+rho*g*L)*x_fin)/E;
+% figure
+figure, plot(x_fin,u_fin,'-r',x_fin,u_fin_f,'-k'),hold on
+
+%% Solution éléments finis
+x = 0:l:L;
+rg = rho*g;
+
+%% initialisation matrice raideur globale et du vecteur forces
+k = zeros(Nel+1);
+f = zeros(Nel+1,1);
+
+%% assemblage matrice raideur locale et second membre
+[ke,fe] = assemble_local(E,l,rg);
+
+%% assemblage matrice raideur globale
+% On ajoute progressivement les matrices locales
+% à la matrice globale
+for i = 1:Nel    
+    k(i:i+1,i:i+1) = k(i:i+1,i:i+1) + ke;
+    f(i:i+1) = f(i:i+1) + fe;
+end
+
+%% Ajout de la condition limite en force x = L 
+f_b = f;
+f_b(Nel+1) = f_b(Nel+1) + b/S;
+
+%% Reduction
+% On élimine la première ligne et la première colonne
+% au second membre
+kr = k(2:Nel+1,2:Nel+1);
+fr = f(2:Nel+1);
+% réduction cas force appliqué
+fr_b = f_b(2:Nel+1);
+
+%% Résolution
+u_fe = kr\fr; % solution de kr*u_fe = fr, méthode par défaut : pivot de Gauss
+% On ajoute le premier élément du vecteur déplacement, correspondant à la condition limite u1 
+u_fe = [u1; u_fe];
+
+% résolution avec force appliqué
+u_fe_b = kr\fr_b;
+% On ajoute le premier élément du vecteur déplacement, correspondant à la condition limite u1
+u_fe_b = [u1; u_fe_b];
+
+% plot
+plot(x,u_fe,'--r',x,u_fe_b,'--k')
+legend('u exact f0=0', 'u exact f0=b', 'u num f0=0', 'u num f0=b')
+
+% Calcul erreur au sens des moindres carré
+u_ex = (-0.5*rho*g*x.^2 + (rho*g*L).*x)/E;
+u_ex_f = (-0.5*rho*g*x.^2 + (b/S+rho*g*L).*x)/E;
+Err1 = sum((u_ex'-u_fe).^2)/Nel
+Err2 = sum((u_ex_f'-u_fe_b).^2)/Nel
+
+function [ke,fe] = assemble_local(E,l,rg)
+
+% [ke,fe] = assemble_loc(E,l,rg) Assemble local stiffness matrix
+% Output parameters :
+% ke : matrice de raideur d'un élément 
+% fe = vecteur force d'un élément
+% Input parameters :
+% E raideur en Pa, 
+% l = longueur de l'élément en m
+% rg = rho*g = densité en km/m^3 x acceleration de la gravité
+
+coef1 = E/l;
+coef2 = rg*l/2;
+
+ke = coef1*[1 -1; -1 1];
+fe = coef2*[1; 1];
+
+end
