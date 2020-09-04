@@ -1,0 +1,6 @@
+function misfit = calcmisfit( Uobs,Umod )
+
+misfit = sum(abs(Uobs-Umod))/sum(Uobs)*100;
+
+end
+

@@ -1,0 +1,76 @@
+function  [Xc,Yc,C]=voronoiTD(X,Y,LIM)
+%[Xc,Yc,C]=voronoiTD(X,Y)
+%
+% retourne les cellules de voronoi des points de coordonnees X et Y
+%
+% Xc = coordonnees x des points des polygones
+% Yc = coordonnees y des points des polygones
+% C = indices des points pour chaque cellules
+%
+% les indices de C{i} correspondent à la cellule du point de coordonnees
+% x=X(i) y=Y(i)
+%
+% pour obtenir les coordonnees de la cellule i :
+%
+% ind = C{i};
+% xci = Xc(ind);
+% yci = Yc(ind);
+%
+% [Xc,Yc,C]=voronoiTD(X,Y,LIM)
+% redimensionne les cellules pour une meilleur prise en compte de la forme.
+% 
+% exemple : 
+% LIM = ([-5 5 ;-1 1])
+% X = rand(50,1)*10 -5;
+% Y = rand(50,1)*2 -1;
+%%% creation des cellules
+% [Xc,Yc,C]=voronoiTD(X,Y)
+%
+%%% affichage des cellules de chaque point
+% figure,set(gca,'xlim',LIM(1,:),'ylim',LIM(2,:))
+% plot(X(i),Y(i),'.');
+% hold on
+% for i=1:numel(C) % pour chaque cellule
+%   ind = C{i}; % indices des points de la cellule i
+%   plot(X(i),Y(i),'r.');
+%   plot([Xc(ind);Xc(ind(1))],[Yc(ind);Yc(ind(1))])
+%   set(gca,'xlim',LIM(1,:),'ylim',LIM(2,:))
+%   drawnow
+%   pause(0.1)
+% end
+% set(gca,'xlim',LIM(1,:),'ylim',LIM(2,:))
+
+if nargin<2
+    error('pas assez d''arguments')
+end
+
+if numel(X) ~= numel(Y)
+    error('X et Y doivent avoir les meme dim')
+end
+
+if exist('LIM','var')==0
+    LIM = [min(X(:)),max(X(:));min(Y(:)),max(Y(:))];
+end
+
+if mean(size(LIM))~=2 || numel(LIM)~=4
+    error('LIM doit correspondre aux bornes de X et Y')
+end
+
+pt = [X(:),Y(:)];
+%%% dedimensionnalise
+ND = numel(LIM)/2;
+for i=1:ND
+    lim = LIM(i,:);
+    ptd(:,i) = (pt(:,i)-min(lim))./(max(lim)-min(lim));
+end
+
+[V,C]=voronoin(ptd);
+
+%%% redimensionnalise
+for i=1:ND
+    lim = LIM(i,:);
+    V(:,i) = V(:,i)*(max(lim)-min(lim))+min(lim);
+end
+
+Xc = V(:,1);
+Yc = V(:,2);

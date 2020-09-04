@@ -1,0 +1,50 @@
+function [x,y] = rand_in_poly(Xc,Yc,LIM)
+%Aurélien Augier 2011
+% [x,y] = rand_in_poly(Xc,Yc)
+% fonction permettant de choisir un point de maniere aleatoire dans un
+% polygone dont les coordonnées des sommets sont stockées dans Xc et Yc
+%
+%%% exemple : 
+%%% creation d'un polygone
+% Xp = rand(6,1); Yp = rand(6,1);
+% Yp = [Yp ; Yp(1)]; Xp = [Xp ; Xp(1)];
+% K = convhull(Xp,Yp);
+% Xp= Xp(K);Yp=Yp(K);
+%
+% [x,y] = rand_in_poly(Xp,Yp)
+%
+% figure
+% plot(Xp,Yp),hold on
+% plot(x,y,'pr')
+
+if nargin == 2
+    LIM(1,1) = min(Xc(isinf(Xc)==0));
+    LIM(1,2) = max(Xc(isinf(Xc)==0));
+    LIM(2,1) = min(Yc(isinf(Yc)==0));
+    LIM(2,2) = max(Yc(isinf(Yc)==0));
+end
+    
+Xc(Xc< LIM(1,1)) = LIM(1,1);
+Xc(Xc> LIM(1,2)) = LIM(1,2);
+Yc(Yc< LIM(2,1)) = LIM(2,1);
+Yc(Yc> LIM(2,2)) = LIM(2,2);
+
+
+limx = [min(Xc),max(Xc)];
+limy = [min(Yc),max(Yc)];
+
+ok = false;
+
+while ok == false
+    p = rand(1,2);
+    p(1) = p(1)*(max(limx)-min(limx))+min(limx);
+    p(2) = p(2)*(max(limy)-min(limy))+min(limy);
+    in = inpolygon(p(1),p(2),Xc,Yc);
+    if in==1
+        ok = true;
+    else
+        ok = false;
+    end
+end
+x= p(1);
+y= p(2);

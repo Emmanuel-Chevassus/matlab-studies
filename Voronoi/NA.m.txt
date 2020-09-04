@@ -1,0 +1,110 @@
+clear all
+close all
+clc
+% points de mesure
+x = [0; 56.2; 115.3; 165.2; 236.6; 338.8; 485.3; 695.0; 995.4; 1425.6; 2041.7; 2924.2; 4187.9; 5997.9];
+Uz_mes = [0.5667; 0.5657; 0.5625; 0.5581; 0.5492; 0.5318; 0.4987; 0.4407; 0.3518; 0.2411; 0.1372; 0.0651; 0.0269; 0.0102];
+Ur_mes = [0; 0.0196; 0.0399; 0.0567; 0.0799; 0.1107; 0.1488; 0.1883; 0.2152; 0.2113; 0.1721; 0.1171; 0.0693; 0.0375];
+U_mes = [Uz_mes;Ur_mes];
+
+figure
+plot(x,Uz_mes,'*b',x,Ur_mes,'*g')
+xlabel('Distance (m)'),ylabel('Deplacements (m)')
+
+% ParamÃ¨tres
+DP = 1e9; % Variation de pression en Pa dans la source
+E = 5e9; % Module d'Young en Pa
+nu = 0.25; % Coefficient de Poisson (sans unité)
+G = E./(2.*(1+nu)); % Module de Coulomb en Pa
+
+% ParamÃ¨tres de la recherche NA
+NS1 = 50;
+NS2 = 15;
+NIT = 20;
+
+rmin = 50;
+rmax = 200;
+dmin = 800;
+dmax = 4000;
+
+%% %% PREMIERE ITERATION %%%
+% Tirage des NS1 modèles aléatoires initiaux
+rmod = rand(1,NS1).*(rmax - rmin) + rmin;
+dmod = rand(1,NS1).*(dmax - dmin) + dmin;
+
+% Cellules de Voronoï des modèles initiaux
+LIM = ([rmin rmax; dmin dmax]);
+[Xc,Yc,C] = voronoiTD(rmod,dmod,LIM);
+figure, plot(rmod,dmod,'.g')
+hold on
+
+for i=1:numel(C) % pour chaque cellule
+  ind = C{i}; % indices des points de la cellule i
+  plot(rmod(i),dmod(i),'r.');
+  plot([Xc(ind);Xc(ind(1))],[Yc(ind);Yc(ind(1))])
+  set(gca,'xlim',LIM(1,:),'ylim',LIM(2,:))
+  drawnow
+  pause(0.1)
+end
+set(gca,'xlim',LIM(1,:),'ylim',LIM(2,:))
+
+% Calcul des misfits de tous les modèles de la 1ère itération
+modeles = [];
+for i = 1:NS1
+    [Uz_calc,Ur_calc] = mogi(rmod(i), DP, dmod(i), G, x);
+    U_calc = [Uz_calc;Ur_calc];
+    misfit = calcmisfit(U_mes,U_calc);
+    modeles = [modeles;misfit rmod(i) dmod(i) i];
+end
+
+tic
+best_modeles = [];
+for i = 1:NIT
+    title(['Iteration ',num2str(i)]);
+    modeles_tries = sortrows(modeles,1);
+    ind_best = modeles_tries(1:NS2,4);
+    best_modeles = [best_modeles;i modeles_tries(1,:)];
+    for j = 1:NS2
+        ind = C{ind_best(j)};
+        plot([Xc(ind);Xc(ind(1))],[Yc(ind);Yc(ind(1))], '-g')
+        rp = Xc(ind); dp = Yc(ind);
+        [r2,d2] = rand_in_poly(rp,dp);
+        plot(r2,d2,'.r')
+        [Uz_calc,Ur_calc] = mogi(r2,DP, d2, G, x);
+        U_calc = [Uz_calc;Ur_calc];
+        misfit = calcmisfit(U_mes,U_calc);
+        modeles = [modeles;misfit r2 d2 NS1+(i-1)*NS2+j];
+    end
+    rmod = modeles(:,2);
+    dmod = modeles(:,3);
+    [Xc,Yc,C] = voronoiTD(rmod,dmod,LIM);
+    cla
+    plot(rmod,dmod,'.r')
+    for k = 1:length(C)
+        ind = C{k};
+        plot([Xc(ind);Xc(ind(1))],[Yc(ind);Yc(ind(1))])
+        set(gca,'xlim',LIM(1,:),'ylim',LIM(2,:))
+        pause(0.05)
+    end
+end
+toc
+modeles_tries = sortrows(modeles,1);
+best_model = modeles_tries(1,:);
+bestr = best_model(2);
+bestd = best_model(3);
+bestmisfit = best_model(1);
+disp(['Le meilleur modèle correspond à un rayon de ', num2str(bestr),' m et une profondeur de ',num2str(bestd),'m. Son misfit est de ',num2str(bestmisfit),' %.'])
+plot(bestr,bestd,'ob')
+
+[Uz_calc,Ur_calc] = mogi(bestr,DP, bestd, G, x);
+figure(1), hold on
+plot(x,Uz_calc,'ob',x,Ur_calc,'og')
+
+% Evolution du misfit, de r et de d en fonction des itÃ©rations
+figure,
+subplot(1,3,1), plot(best_modeles(:,1),best_modeles(:,2),'*b')
+title('Misfit (%) en fonction du numéro d''itération')
+subplot(1,3,2), plot(best_modeles(:,1),best_modeles(:,3),'*b')
+title('Rayon (m) en fonction du numéro d''itération')
+subplot(1,3,3), plot(best_modeles(:,1),best_modeles(:,4),'*b')
+title('Profondeur (m) en fonction du numéro d''itération')
