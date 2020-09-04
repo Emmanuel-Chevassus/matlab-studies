@@ -1,0 +1,69 @@
+% Equation poutre
+L = 5;
+Nel = 10;
+l = L/Nel;
+% propriétés de la barre
+rho = 1000;
+g = 9.8;
+
+E = 10e6;
+S = 0.3;
+b = 15000; 
+
+%% solutions Analytique
+x_fin = 0:0.1:L; 
+u_fin = ?;
+% solution avec force appliquée
+u_fin_f =  ?;
+% figure
+figure, plot(x_fin,u_fin,'-r',x_fin,u_fin_f,'-k'),hold on
+legend('b=0','b=15000')
+
+%% Solution éléments finis
+% Assemble global stiffness matrix
+rg = rho*g;
+
+% initialisation de k et f
+k = zeros();
+f = zeros();
+
+% matrice de raideur locale
+[ke,fe] = assemble_loc(E,l,rg);
+
+for i = 1:Nel    
+    k = k + ke;
+    f = f + fe;
+end
+
+% Ajout de la condition limite en force x = L
+f_f = f;
+f_f(end) = f_f(end) + b/S;
+
+% Reduction
+% On élimine la première ligne et la première colonne, en ajoutant u1*k(2,1) 
+% au second membre
+kr = k(2:end,2:Nel+1);
+fr = f(2:end);
+
+% 
+% cas force appliqué
+fr_f = f_f(2:end);
+
+% Résolution
+u_fe = kr\fr; % solution de kr*u_fe = fr, pivot de Gauss
+
+% résolution avec force appliqué
+u_fe_f = kr\fr_f;
+
+% plot
+x = l:l:L;
+plot(x,u_fe,'*-r',x,u_fe_f,'*-k')
+legend('sans force','avec force')
+xlabel('Distance en m')
+ylabel('déplacement en m')
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [ke,fe] = assemble_loc(E,l,rg)
+    
+   
+end

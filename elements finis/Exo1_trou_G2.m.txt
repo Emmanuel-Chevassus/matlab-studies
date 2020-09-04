@@ -1,0 +1,50 @@
+% Ex1 : interpolation linéaire. La fonction interp_lin permettant de faire
+% l'interpolation liénaire entre 2 points est à la fin du fichier.
+% Pour tester des parties de cette fonction, faire des copier-collé 
+clf
+clear all
+
+% nombre d'éléments d'interpolation
+NbEl = 10;
+
+% Longueur de la zone considérée 
+L = 5;
+
+% Calcul des points entre lesquels se font les interpolation (xi,yi) et représentation
+xi = 0:(5/NbEl):L;
+yi = fun(xi); % utiliser la fonction plus bas
+
+% initialisation de l'erreur
+Err = 0;
+% Interpolation sur Nb éléments, représentation, calcul de l'erreur
+for i = 1:NbEl % les indices commencent à 1 en matlab
+    % points de calculs sur chaque segment 
+    x_int = xi(i):0.1:xi(i+1); 
+    % calcul de la fonction à interpoler
+    y = fun(x_int);
+    % interpolation linéaire sur chaque segment, en utilsant l afonction
+    % plus bas
+    y_int = lin_interp(xi(i),xi(i+1),yi(i),yi(i+1),x_int);
+    plot(x_int,y,'k-',x_int,y_int,'r-o'),hold on
+    % calcul de l'erreur
+    Err = sum(abs(y_int-y)) + Err;
+ end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Fonctions lin interp, qui retourne y, connaissant x
+function [y] = lin_interp(x0,x1,y0,y1,x)
+
+    l = x1 - x0;
+phi_0 = (x1 - x)/l;
+phi_1 = (x - x0)/l;
+y =  y0*phi_0 + y1*phi_1;
+
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function y = fun(x)
+
+    y = x.*sin(x);
+    
+end    
