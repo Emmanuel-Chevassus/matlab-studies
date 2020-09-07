@@ -1,0 +1,102 @@
+Source:
+           C:\LaMP_OPGC\Enseignement\M1_lidar_radar_GPS\TP\Fichiers_pour_etudiants\Matrice_ECMWF.nc
+Format:
+           64bit
+Global Attributes:
+           Conventions = 'CF-1.6'
+           history     = '2017-11-16 17:40:43 GMT by grib_to_netcdf-2.5.0: grib_to_netcdf /data/data04/scratch/_mars-atls06-a562cefde8a29a7288fa0b8b7f9413f7-uq9Y4H.grib -o /data/data03/scratch/_grib2netcdf-atls06-98f536083ae965b31b0d04811be6f4c6-sPKHvQ.nc -utime'
+Dimensions:
+           longitude = 162
+           latitude  = 68
+           level     = 37
+           time      = 124   (UNLIMITED)
+Variables:
+    longitude
+           Size:       162x1
+           Dimensions: longitude
+           Datatype:   single
+           Attributes:
+                       units     = 'degrees_east'
+                       long_name = 'longitude'
+    latitude 
+           Size:       68x1
+           Dimensions: latitude
+           Datatype:   single
+           Attributes:
+                       units     = 'degrees_north'
+                       long_name = 'latitude'
+    level    
+           Size:       37x1
+           Dimensions: level
+           Datatype:   int32
+           Attributes:
+                       units     = 'millibars'
+                       long_name = 'pressure_level'
+    time     
+           Size:       124x1
+           Dimensions: time
+           Datatype:   int32
+           Attributes:
+                       units     = 'hours since 1900-01-01 00:00:0.0'
+                       long_name = 'time'
+                       calendar  = 'gregorian'
+    w        
+           Size:       162x68x37x124
+           Dimensions: longitude,latitude,level,time
+           Datatype:   int16
+           Attributes:
+                       scale_factor  = 0.000186
+                       add_offset    = 0.183
+                       _FillValue    = -3.28e+04
+                       missing_value = -3.28e+04
+                       units         = 'Pa s**-1'
+                       long_name     = 'Vertical velocity'
+                       standard_name = 'lagrangian_tendency_of_air_pressure'
+    r        
+           Size:       162x68x37x124
+           Dimensions: longitude,latitude,level,time
+           Datatype:   int16
+           Attributes:
+                       scale_factor  = 0.00272
+                       add_offset    = 69.6
+                       _FillValue    = -3.28e+04
+                       missing_value = -3.28e+04
+                       units         = '%'
+                       long_name     = 'Relative humidity'
+                       standard_name = 'relative_humidity'
+    o3       
+           Size:       162x68x37x124
+           Dimensions: longitude,latitude,level,time
+           Datatype:   int16
+           Attributes:
+                       scale_factor  = 2.21e-10
+                       add_offset    = 7.24e-06
+                       _FillValue    = -3.28e+04
+                       missing_value = -3.28e+04
+                       units         = 'kg kg**-1'
+                       long_name     = 'Ozone mass mixing ratio'
+    u        
+           Size:       162x68x37x124
+           Dimensions: longitude,latitude,level,time
+           Datatype:   int16
+           Attributes:
+                       scale_factor  = 0.00514
+                       add_offset    = 5.36
+                       _FillValue    = -3.28e+04
+                       missing_value = -3.28e+04
+                       units         = 'm s**-1'
+                       long_name     = 'U component of wind'
+                       standard_name = 'eastward_wind'
+    v        
+           Size:       162x68x37x124
+           Dimensions: longitude,latitude,level,time
+           Datatype:   int16
+           Attributes:
+                       scale_factor  = 0.00444
+                       add_offset    = 12
+                       _FillValue    = -3.28e+04
+                       missing_value = -3.28e+04
+                       units         = 'm s**-1'
+                       long_name     = 'V component of wind'
+                       standard_name = 'northward_wind'
+>> 
